@@ -1,8 +1,8 @@
+# coding: utf-8
 """
 Individual class
 """
-import os
-from . import fitness
+import random
 
 
 class Individual(object):
@@ -10,12 +10,22 @@ class Individual(object):
     Manage an individual
     """
 
-    defaultGeneLength = 64
-
-    def __init__(self):
+    def __init__(self, length=64, bitstring_or_list=None):
+        """
+        Initialize a new Individual
+        """
         self._fitness = 0
-        self.genes = bytearray(os.urandom(self.defaultGeneLength))  # random array of bytes
         self.repr = None
+        self.default_length = length
+        if not bitstring_or_list:
+            # random array of bytes
+            self.genes = [random.getrandbits(1)
+                          for _ in range(self.default_length)]
+        else:
+            if isinstance(bitstring_or_list, str):
+                self.genes = [int(b) for b in bitstring_or_list]
+            elif isinstance(bitstring_or_list, list):
+                self.genes = bitstring_or_list
 
 
     @property
@@ -25,12 +35,14 @@ class Individual(object):
         """
         return self.genes[idx]
 
+
     @gene.setter
     def gene(self, idx, value):
         """
         Set a new gene at index idx
         """
         self.genes[idx] = value
+
 
     @property
     def size(self):
@@ -39,15 +51,6 @@ class Individual(object):
         """
         return len(self.genes)
 
-    def fitness(self):
-        """
-        Return memoized fitness value
-        """
-        if self._fitness:
-            self._fitness = fitness.compute(self)
-        return self._fitness
 
     def __repr__(self):
-        if not self.repr:
-            self.repr = bin(int.from_bytes(self.genes, 'little'))
-        return self.repr
+        return ''.join([str(b) for b in self.genes])
